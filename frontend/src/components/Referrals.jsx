@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiUsers, FiCheckCircle, FiClock, FiDollarSign, FiArrowLeft } from 'react-icons/fi';
+import "./Referrals.css";
 
 function Referrals() {
   const navigate = useNavigate();

@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 
 // ✅ Import User model correctly
 const { User } = require('../models');
+const authController = require('../controllers/authController');
 
 // ✅ .env secret fallback
 const JWT_SECRET = process.env.JWT_SECRET || 'defaultsecret';
@@ -65,5 +66,10 @@ router.post('/login', async (req, res) => {
 function generateReferralCode() {
   return 'REF' + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
+// public routes for registration and login
+router.post('/register', authController.register);
+router.post('/login', authController.login);
+//protected routes
+router.get('/profile', authMiddleware, authController.getProfile);
 
 module.exports = router;

@@ -20,6 +20,11 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/referrals" element={<Referrals />} />
+        <Route path="/spin" element={<Spin />} />
+        <Route path="/blogs" element={<Blogs />} />
+        <Route path="/videos" element={<Videos />} />
+        <Route path="/mpesa" element={<Mpesa />} />
       </Routes>
     </Router>
   );

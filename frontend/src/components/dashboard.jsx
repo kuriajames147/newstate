@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -189,18 +190,6 @@ function Dashboard() {
       path: '/read'
     },
     {
-      id: 5,
-      title: 'Daily Check-in',
-      description: 'Check in daily to maintain your streak and earn bonus points',
-      icon: <FiClock />,
-      reward: 'Streak bonus',
-      time: '1 min',
-      points: '+10',
-      color: 'streak',
-      status: 'pending',
-      path: '/daily'
-    },
-    {
       id: 6,
       title: 'Withdraw Earnings',
       description: 'Convert your points to real money and withdraw instantly',
@@ -217,7 +206,7 @@ function Dashboard() {
   const recentActivities = [
     { 
       id: 1, 
-      title: 'Earned 50 points from referral', 
+      title: 'Earned ksh 50 from referral', 
       time: '2 hours ago', 
       type: 'earnings',
       points: '+50',
@@ -294,7 +283,6 @@ function Dashboard() {
               <span className="logo-icon">💎</span>
               <span className="logo-text">NewStateHela</span>
             </div>
-            <span className="logo-badge">PRO</span>
           </div>
           <button className="sidebar-close" onClick={() => setSidebarOpen(false)}>
             <FiX />
@@ -443,7 +431,7 @@ function Dashboard() {
             <div className="welcome-card">
               <div className="welcome-header">
                 <div className="welcome-text">
-                  <h1>Welcome back, <span className="user-name-highlight">{user.name}</span>! 👋</h1>
+                  <h1>Welcome back, <span className="user-name-highlight">{user.name}</span>! </h1>
                   <p className="welcome-subtitle">Here's what's happening with your account today.</p>
                 </div>
                 <div className={`account-status ${user.isActivated ? 'active' : 'inactive'}`}>
@@ -604,7 +592,7 @@ function Dashboard() {
           {!user.isActivated && (
             <div className="activation-banner">
               <div className="activation-content">
-                <div className="activation-icon">🚀</div>
+                <div className="activation-icon"></div>
                 <div className="activation-text">
                   <h3>Unlock Full Potential</h3>
                   <p>Activate your account to access all features and increase earning limits</p>
@@ -613,7 +601,7 @@ function Dashboard() {
                   className="activate-button"
                   onClick={activateAccount}
                 >
-                  <FiDollarSign /> Activate Now - Ksh 250
+                   Activate Now - Ksh 250
                 </button>
               </div>
             </div>
@@ -623,7 +611,7 @@ function Dashboard() {
           <div className="activities-section">
             <div className="section-header">
               <h2>Earning Activities</h2>
-              <p className="section-subtitle">Complete these activities to earn more points</p>
+              <p className="section-subtitle">Explore the different ways of earning here at Statehela </p>
             </div>
             
             <div className="activities-grid">

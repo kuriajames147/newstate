@@ -1,9 +1,19 @@
+#root {
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+
 /* DASHBOARD MAIN STYLES */
 .dashboard-container {
   display: flex;
   min-height: 100vh;
-  background: #f8fafc;
-  position: relative;
+  background: #f1f4f7;
+  padding: 24px;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* Loading State */
@@ -63,7 +73,7 @@
 
 /* Sidebar Styles */
 .dashboard-sidebar {
-  width: 280px;
+  width: 300px;
   background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
   position: fixed;
   height: 100vh;
@@ -81,7 +91,22 @@
 .dashboard-sidebar.open {
   transform: translateX(0);
 }
-
+.dashboard-main {
+  background-color: #9edacb;
+  width: calc(100%-300px);
+  margin-left: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 100vh;
+  min-width: 100vh;
+  flex: 1;
+}
+#root {
+  width: 100;
+  min-width: 100vh;
+  min-height: 100vh;
+  height: fit-content;
+}
 /* Sidebar Header */
 .sidebar-header {
   padding: 24px;
@@ -631,14 +656,20 @@
 
 /* Main Content */
 .dashboard-content {
-  padding: 32px;
-  max-width: 1400px;
+  padding: 20px;
+  min-height: 100vh;
+  max-width: 1200px;
   margin: 0 auto;
+  box-sizing: border-box;
+  overflow: visible;
 }
 
 /* Welcome Section */
 .welcome-section {
   margin-bottom: 24px;
+  position: relative;
+  margin-top: 0;
+
 }
 
 .welcome-card {
@@ -980,7 +1011,9 @@
 .share-section h3 {
   font-size: 20px;
   font-weight: 600;
+  color: violet;
   margin-bottom: 16px;
+
 }
 
 .share-buttons {
@@ -994,9 +1027,9 @@
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 10px;
-  color: white;
-  font-size: 14px;
-  font-weight: 500;
+  color: rgb(243, 8, 8);
+  font-size: 30px;
+  font-weight: bolder;
   cursor: pointer;
   display: flex;
   align-items: center;

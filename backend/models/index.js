@@ -10,7 +10,7 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-// Import models
+// Import models - ALL models should get both sequelize and Sequelize.DataTypes
 db.User = require('./User')(sequelize, Sequelize.DataTypes);
 db.Transaction = require('./Transaction')(sequelize, Sequelize.DataTypes);
 db.Quiz = require('./Quiz')(sequelize, Sequelize.DataTypes);

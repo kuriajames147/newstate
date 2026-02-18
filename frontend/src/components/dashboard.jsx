@@ -192,7 +192,7 @@ function Dashboard() {
     {
       id: 6,
       title: 'Withdraw Earnings',
-      description: 'Convert your points to real money and withdraw instantly',
+      description: 'View your earnings and withdraw to your MPESA account instantly',
       icon: <FiDollarSign />,
       reward: 'Instant withdrawal',
       time: '2 mins',
@@ -244,7 +244,7 @@ function Dashboard() {
     { id: 'spin', label: 'Spin & Win', icon: <FiGift />, path: '/spin' },
     { id: 'watch', label: 'Watch & Earn', icon: <FiPlayCircle />, path: '/watch' },
     { id: 'read', label: 'Read & Earn', icon: <FiBookOpen />, path: '/read' },
-    { id: 'withdraw', label: 'Withdraw', icon: <FiDollarSign />, path: '/withdraw' },
+    { id: 'withdraw', label: 'Withdraw', icon: <FiDollarSign />, path: '/Withdraw' },
     { id: 'analytics', label: 'Analytics', icon: <FiBarChart2 />, path: '/analytics' },
     { id: 'profile', label: 'Profile', icon: <FiUser />, path: '/profile' },
     { id: 'settings', label: 'Settings', icon: <FiSettings />, path: '/settings' },
@@ -411,7 +411,7 @@ function Dashboard() {
                   <button className="dropdown-item" onClick={() => handleNavigate('/settings')}>
                     <FiShield /> Account Security
                   </button>
-                  <button className="dropdown-item" onClick={() => handleNavigate('/withdraw')}>
+                  <button className="dropdown-item" onClick={() => handleNavigate('/component/Withdraw')}>
                     <FiCreditCard /> Billing & Payments
                   </button>
                   <div className="dropdown-divider"></div>

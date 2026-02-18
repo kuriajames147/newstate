@@ -1,156 +1,154 @@
+const { Model } = require('sequelize');
 const bcrypt = require('bcryptjs');
-const { dbHelpers } = require('../database/db');
 
-class User {
-    // Create new user
-    static async create(userData) {
-        try {
-            const { username, email, full_name, password, phone_number } = userData;
-            
-            // Hash password
-            const salt = await bcrypt.genSalt(10);
-            const passwordHash = await bcrypt.hash(password, salt);
-            
-            // Generate referral code (using first 4 chars of username + random number)
-            const referralCode = username.slice(0, 4).toUpperCase() + Math.floor(1000 + Math.random() * 9000);
-            
-            const result = await dbHelpers.run(
-                `INSERT INTO users (username, email, full_name, phone_number, password_hash, referral_code) 
-                 VALUES (?, ?, ?, ?, ?, ?)`,
-                [username, email, full_name, phone_number, passwordHash, referralCode]
-            );
-            
-            return { id: result.id, username, email, full_name, referral_code: referralCode };
-        } catch (error) {
-            throw error;
+module.exports = (sequelize, DataTypes) => {
+  class User extends Model {
+    static associate(models) {
+      // Define associations here
+      User.hasMany(models.Transaction, {
+        foreignKey: 'userId',
+        as: 'transactions'
+      });
+    }
+
+    // Instance method to verify password
+    async verifyPassword(password) {
+      return await bcrypt.compare(password, this.password_hash);
+    }
+
+    // Instance method to get dashboard stats
+    async getDashboardStats() {
+      const userId = this.id;
+      
+      // Get recent activities
+      const activities = await sequelize.query(
+        `SELECT * FROM activities 
+         WHERE user_id = ? 
+         ORDER BY created_at DESC 
+         LIMIT 10`,
+        {
+          replacements: [userId],
+          type: sequelize.QueryTypes.SELECT
         }
-    }
+      );
 
-    // Find user by username
-    static async findByUsername(username) {
-        try {
-            return await dbHelpers.get(
-                'SELECT * FROM users WHERE username = ?',
-                [username]
-            );
-        } catch (error) {
-            throw error;
+      // Get referral stats
+      const referralStats = await sequelize.query(
+        `SELECT 
+            COUNT(*) as total_referrals,
+            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_referrals,
+            SUM(earned_points) as total_points_from_referrals
+         FROM referrals 
+         WHERE referrer_id = ?`,
+        {
+          replacements: [userId],
+          type: sequelize.QueryTypes.SELECT,
+          plain: true
         }
-    }
+      );
 
-    // Find user by email
-    static async findByEmail(email) {
-        try {
-            return await dbHelpers.get(
-                'SELECT * FROM users WHERE email = ?',
-                [email]
-            );
-        } catch (error) {
-            throw error;
+      // Get today's earnings
+      const todayEarnings = await sequelize.query(
+        `SELECT COALESCE(SUM(amount), 0) as today_earnings
+         FROM transactions 
+         WHERE user_id = ? 
+         AND DATE(created_at) = DATE('now')
+         AND status = 'completed'`,
+        {
+          replacements: [userId],
+          type: sequelize.QueryTypes.SELECT,
+          plain: true
         }
-    }
+      );
 
-    // Find user by ID
-    static async findById(id) {
-        try {
-            const user = await dbHelpers.get(
-                `SELECT id, username, email, full_name, phone_number, 
-                        points, referrals, total_earnings, referral_code, 
-                        created_at, last_login 
-                 FROM users WHERE id = ?`,
-                [id]
-            );
-            return user;
-        } catch (error) {
-            throw error;
+      return {
+        user: {
+          id: this.id,
+          username: this.username,
+          email: this.email,
+          full_name: this.full_name,
+          points: this.points,
+          referrals: this.referrals,
+          total_earnings: this.total_earnings,
+          referral_code: this.referral_code
+        },
+        activities,
+        referral_stats: referralStats || { total_referrals: 0, completed_referrals: 0, total_points_from_referrals: 0 },
+        today_earnings: todayEarnings?.today_earnings || 0
+      };
+    }
+  }
+
+  User.init({
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: true
+      }
+    },
+    full_name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    phone_number: {
+      type: DataTypes.STRING
+    },
+    password_hash: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    referral_code: {
+      type: DataTypes.STRING,
+      unique: true
+    },
+    points: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    referrals: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    total_earnings: {
+      type: DataTypes.FLOAT,
+      defaultValue: 0
+    },
+    last_login: {
+      type: DataTypes.DATE
+    }
+  }, {
+    sequelize,
+    modelName: 'User',
+    tableName: 'users',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: false,
+    hooks: {
+      beforeCreate: async (user) => {
+        if (user.password_hash) {
+          const salt = await bcrypt.genSalt(10);
+          user.password_hash = await bcrypt.hash(user.password_hash, salt);
         }
-    }
-
-    // Verify password
-    static async verifyPassword(password, passwordHash) {
-        return await bcrypt.compare(password, passwordHash);
-    }
-
-    // Update user stats
-    static async updateStats(userId, updates) {
-        try {
-            const fields = [];
-            const values = [];
-            
-            if (updates.points !== undefined) {
-                fields.push('points = points + ?');
-                values.push(updates.points);
-            }
-            
-            if (updates.referrals !== undefined) {
-                fields.push('referrals = referrals + ?');
-                values.push(updates.referrals);
-            }
-            
-            if (updates.total_earnings !== undefined) {
-                fields.push('total_earnings = total_earnings + ?');
-                values.push(updates.total_earnings);
-            }
-            
-            if (fields.length === 0) return;
-            
-            values.push(userId);
-            
-            await dbHelpers.run(
-                `UPDATE users SET ${fields.join(', ')} WHERE id = ?`,
-                values
-            );
-        } catch (error) {
-            throw error;
+        // Generate referral code
+        if (!user.referral_code) {
+          user.referral_code = user.username.slice(0, 4).toUpperCase() + 
+                              Math.floor(1000 + Math.random() * 9000);
         }
+      }
     }
+  });
 
-    // Get dashboard stats for user
-    static async getDashboardStats(userId) {
-        try {
-            const user = await this.findById(userId);
-            if (!user) return null;
-
-            // Get recent activities
-            const activities = await dbHelpers.query(
-                `SELECT * FROM activities 
-                 WHERE user_id = ? 
-                 ORDER BY created_at DESC 
-                 LIMIT 10`,
-                [userId]
-            );
-
-            // Get referral stats
-            const referralStats = await dbHelpers.get(
-                `SELECT 
-                    COUNT(*) as total_referrals,
-                    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_referrals,
-                    SUM(earned_points) as total_points_from_referrals
-                 FROM referrals 
-                 WHERE referrer_id = ?`,
-                [userId]
-            );
-
-            // Get today's earnings
-            const todayEarnings = await dbHelpers.get(
-                `SELECT COALESCE(SUM(amount), 0) as today_earnings
-                 FROM transactions 
-                 WHERE user_id = ? 
-                 AND DATE(created_at) = DATE('now')
-                 AND status = 'completed'`,
-                [userId]
-            );
-
-            return {
-                user,
-                activities,
-                referral_stats: referralStats || { total_referrals: 0, completed_referrals: 0, total_points_from_referrals: 0 },
-                today_earnings: todayEarnings?.today_earnings || 0
-            };
-        } catch (error) {
-            throw error;
-        }
-    }
-}
-
-module.exports = User;
+  return User;
+};
